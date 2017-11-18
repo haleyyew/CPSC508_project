@@ -23,14 +23,23 @@ fmtname(char *path)
 }
 
 void
-ls(char *path)
+ls(char *path, uint dev)
 {
   char buf[512], *p;
   int fd;
   struct dirent de;
   struct stat st;
 
-  if((fd = open(path, 0)) < 0){
+  if (dev == 2){
+	printf(1, "||||| open_backup dev == 2");
+	fd = open_backup(path, 0, 2);
+  }
+  else {
+	printf(1, "||||| open_backup dev == 1");
+	fd = open(path, 0);
+  }
+
+  if((fd) < 0){
     printf(2, "ls: cannot open %s\n", path);
     return;
   }
@@ -41,9 +50,11 @@ ls(char *path)
     return;
   }
 
+  //printf(1, "%s %d %d %d DEV = %d\n", fmtname(path), st.type, st.ino, st.size, st.dev);
+
   switch(st.type){
   case T_FILE:
-    printf(1, "%s %d %d %d\n", fmtname(path), st.type, st.ino, st.size);
+    printf(1, "%s %d %d %d DEV = %d\n", fmtname(path), st.type, st.ino, st.size, st.dev);
     break;
 
   case T_DIR:
@@ -63,7 +74,7 @@ ls(char *path)
         printf(1, "ls: cannot stat %s\n", buf);
         continue;
       }
-      printf(1, "%s %d %d %d\n", fmtname(buf), st.type, st.ino, st.size);
+      printf(1, "%s %d %d %d dev=%d\n", fmtname(buf), st.type, st.ino, st.size, st.dev);
     }
     break;
   }
@@ -75,11 +86,15 @@ main(int argc, char *argv[])
 {
   int i;
 
+//  if(argc < 2){
+//    ls(".", 1);
+//    exit();
+//  }
   if(argc < 2){
-    ls(".");
+    ls("testfile", 2);
     exit();
   }
   for(i=1; i<argc; i++)
-    ls(argv[i]);
+    ls(argv[i], 1);
   exit();
 }

@@ -23,6 +23,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+int open_backup(char*, int, uint);
 
 // ulib.c
 int stat(char*, struct stat*);
@@ -37,3 +38,4 @@ void* memset(void*, int, uint);
 void* malloc(uint);
 void free(void*);
 int atoi(const char*);
+char* itoa (int value, char *result, int base);

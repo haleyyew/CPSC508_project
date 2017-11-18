@@ -21,6 +21,7 @@ void            consoleinit(void);
 void            cprintf(char*, ...);
 void            consoleintr(int(*)(void));
 void            panic(char*) __attribute__((noreturn));
+char* 			itoa (int value, char *result, int base);
 
 // exec.c
 int             exec(char*, char**);
@@ -48,10 +49,11 @@ void            iunlockput(struct inode*);
 void            iupdate(struct inode*);
 int             namecmp(const char*, const char*);
 struct inode*   namei(char*);
-struct inode*   nameiparent(char*, char*);
+struct inode*   nameiparent(char*, char*, uint dev);
 int             readi(struct inode*, char*, uint, uint);
 void            stati(struct inode*, struct stat*);
 int             writei(struct inode*, char*, uint, uint);
+struct inode* 	namei_backup(char *path, uint dev);
 
 // ide.c
 void            ideinit(void);

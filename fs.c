@@ -627,10 +627,13 @@ namex(char *path, int nameiparent, char *name)
 {
   struct inode *ip, *next;
 
-  if(*path == '/')
+  if(*path == '/'){
     ip = iget(ROOTDEV, ROOTINO);
-  else
+  }
+  else {
     ip = idup(myproc()->cwd);
+    ip->dev = ROOTDEV;
+  }
 
   while((path = skipelem(path, name)) != 0){
     ilock(ip);
@@ -641,6 +644,7 @@ namex(char *path, int nameiparent, char *name)
     if(nameiparent && *path == '\0'){
       // Stop one level early.
       iunlock(ip);
+
       return ip;
     }
     if((next = dirlookup(ip, name, 0)) == 0){
@@ -654,6 +658,60 @@ namex(char *path, int nameiparent, char *name)
     iput(ip);
     return 0;
   }
+
+  return ip;
+}
+
+static struct inode*
+namex_backup(char *path, int nameiparent, char *name, uint dev)
+{
+  struct inode *ip, *next;
+
+//  cprintf("namex ");
+//  cprintf(path);
+//  char dev[10];
+
+  if(*path == '/'){
+    //ip = iget(ROOTDEV, ROOTINO);
+	ip = iget(dev, ROOTINO);
+  }
+  else {
+    ip = idup(myproc()->cwd);
+    ip->dev = dev;
+  }
+
+  while((path = skipelem(path, name)) != 0){
+    ilock(ip);
+    if(ip->type != T_DIR){
+      iunlockput(ip);
+      return 0;
+    }
+    if(nameiparent && *path == '\0'){
+      // Stop one level early.
+      iunlock(ip);
+
+//      itoa(ip->dev, dev, 10);
+//      cprintf(dev);
+//      cprintf("\n");
+
+      return ip;
+    }
+    if((next = dirlookup(ip, name, 0)) == 0){
+      iunlockput(ip);
+      return 0;
+    }
+    iunlockput(ip);
+    ip = next;
+  }
+  if(nameiparent){
+    iput(ip);
+    return 0;
+  }
+
+//  itoa(ip->dev, dev, 10);
+//  cprintf(dev);
+//  cprintf("\n");
+
   return ip;
 }
 
@@ -665,7 +723,24 @@ namei(char *path)
 }
 
 struct inode*
-nameiparent(char *path, char *name)
+namei_backup(char *path, uint dev)
 {
+  char name[DIRSIZ];
+
+  if (dev == 2){
+	  cprintf("namei dev == 2");
+	  return namex_backup(path, 0, name, ROOTDEVBKUP);
+  }
+
+  return namex(path, 0, name);
+}
+
+struct inode*
+nameiparent(char *path, char *name, uint dev)
+{
+  if (dev == 2){
+	  cprintf("nameiparent dev == 2");
+	  return namex_backup(path, 1, name, ROOTDEVBKUP);
+  }
   return namex(path, 1, name);
 }
