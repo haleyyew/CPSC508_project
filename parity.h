@@ -1,0 +1,2 @@
+
+void parity(void*);

@@ -27,6 +27,7 @@ OBJS = \
 	uart.o\
 	vectors.o\
 	vm.o\
+	parity.o\
 
 # Cross-compiling (e.g., on Mac OS X)
 # TOOLPREFIX = i386-jos-elf
@@ -179,8 +180,8 @@ UPROGS=\
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
 	
-fs2.img: mkfs README $(UPROGS)
-	./mkfs fs2.img README $(UPROGS)
+fs2.img: mkfs README
+	./mkfs fs2.img README
 
 -include *.d
 

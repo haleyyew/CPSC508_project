@@ -473,6 +473,9 @@ readi(struct inode *ip, char *dst, uint off, uint n)
     memmove(dst, bp->data + off%BSIZE, m);
     brelse(bp);
   }
+
+  //cprintf(dst);
+
   return n;
 }
 
@@ -482,6 +485,7 @@ readi(struct inode *ip, char *dst, uint off, uint n)
 int
 writei(struct inode *ip, char *src, uint off, uint n)
 {
+
   uint tot, m;
   struct buf *bp;
 
@@ -496,6 +500,17 @@ writei(struct inode *ip, char *src, uint off, uint n)
   if(off + n > MAXFILE*BSIZE)
     return -1;
 
+
+  cprintf("!!!write!!! \n");
+  char buf[10];
+  //memset(buf, 0, sizeof(buf));
+  strncpy(buf, src, sizeof(buf));
+  cprintf("%x", src);
+  cprintf("-- \n");
+  cprintf("%s", src);
+
+
+
   for(tot=0; tot<n; tot+=m, off+=m, src+=m){
     bp = bread(ip->dev, bmap(ip, off/BSIZE));
     m = min(n - tot, BSIZE - off%BSIZE);
@@ -508,6 +523,11 @@ writei(struct inode *ip, char *src, uint off, uint n)
     ip->size = off;
     iupdate(ip);
   }
+
+	cprintf("-- \n");
+	cprintf("%d \n", n);
+	cprintf("!!!!!! \n");
+
   return n;
 }
 

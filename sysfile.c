@@ -15,6 +15,7 @@
 #include "sleeplock.h"
 #include "file.h"
 #include "fcntl.h"
+#include "parity.h"
 
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
@@ -79,6 +80,29 @@ sys_read(void)
 }
 
 int
+sys_read_backup(void)
+{
+  struct file *f;
+  int n;
+  char *p;
+
+  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
+    return -1;
+  int num = fileread(f, p, n);
+
+//  struct inode *ip = f->ip;
+
+//  char dev_str[10];
+  cprintf("===sys_read_backup ");
+//  itoa(num, dev_str, 10);
+  cprintf("num= %d res=%s", num, p);
+  cprintf("\n");
+
+  parity(p);
+  return num;
+}
+
+int
 sys_write(void)
 {
   struct file *f;
@@ -87,6 +111,11 @@ sys_write(void)
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
+
+//    cprintf("===sys_write ");
+//    cprintf("%s",p);
+//    cprintf("\n");
+
   return filewrite(f, p, n);
 }
 

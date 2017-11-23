@@ -21,3 +21,4 @@
 #define SYS_mkdir  20
 #define SYS_close  21
 #define SYS_open_backup   22
+#define SYS_read_backup   23
