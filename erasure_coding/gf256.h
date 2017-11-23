@@ -60,13 +60,24 @@
 
     // Compiler-specific SSE headers
     #include <tmmintrin.h> // SSE3: _mm_shuffle_epi8
-    #include <emmintrin.h> // SSE2
+	#include <emmintrin.h> // SSE2
 
 #else
 
-    #error "Compiler unsupported : Add support here."
+    //#error "Compiler unsupported : Add support here."
+    
+    #define GF256_M128 __m128i
+    #define GF256_RESTRICT __restrict__
+    #define GF256_FORCE_INLINE __attribute__((always_inline)) inline
+    #define GF256_ALIGNED __attribute__ ((aligned (16)))
+    
+    #include <tmmintrin.h> // SSE3: _mm_shuffle_epi8
+	#include <emmintrin.h> // SSE2
 
 #endif
+
+
+
 
 
 #ifdef __cplusplus

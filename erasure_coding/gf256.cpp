@@ -640,6 +640,8 @@ extern "C" void gf256_muladd_mem(void * GF256_RESTRICT vz, uint8_t y,
     }
 }
 
+
+
 extern "C" void gf256_mul_mem(void * GF256_RESTRICT vz, const void * GF256_RESTRICT vx, uint8_t y, int bytes)
 {
     // Use a single if-statement to handle special cases
