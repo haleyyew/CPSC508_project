@@ -25,6 +25,8 @@ int sleep(int);
 int uptime(void);
 int open_backup(char*, int, uint);
 int read_backup(int, void*, int);
+int corrupt_file(char*, uint);
+int write_backup(int, void*, int);
 
 // ulib.c
 int stat(char*, struct stat*);

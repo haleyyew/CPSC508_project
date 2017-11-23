@@ -105,6 +105,8 @@ extern int sys_write(void);
 extern int sys_uptime(void);
 extern int sys_open_backup(void);
 extern int sys_read_backup(void);
+extern int sys_corrupt_file(void);
+extern int sys_write_backup(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -130,6 +132,10 @@ static int (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_open_backup]    sys_open_backup,
 [SYS_read_backup]    sys_read_backup,
+[SYS_corrupt_file]   sys_corrupt_file,
+[SYS_write_backup]   sys_write_backup,
+
+
 };
 
 void

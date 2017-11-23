@@ -84,7 +84,7 @@ ASFLAGS = -m32 -gdwarf-2 -Wa,-divide
 # FreeBSD ld wants ``elf_i386_fbsd''
 LDFLAGS += -m $(shell $(LD) -V | grep elf_i386 2>/dev/null | head -n 1)
 
-xv6.img: bootblock kernel fs.img fs2.img
+xv6.img: bootblock kernel fs.img fs2.img fs3.img
 	dd if=/dev/zero of=xv6.img count=10000
 	dd if=bootblock of=xv6.img conv=notrunc
 	dd if=kernel of=xv6.img seek=1 conv=notrunc
@@ -180,15 +180,18 @@ UPROGS=\
 fs.img: mkfs README $(UPROGS)
 	./mkfs fs.img README $(UPROGS)
 	
-fs2.img: mkfs README
-	./mkfs fs2.img README
+fs2.img: mkfs
+	./mkfs fs2.img
+	
+fs3.img: mkfs
+	./mkfs fs3.img
 
 -include *.d
 
 clean: 
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
 	*.o *.d *.asm *.sym vectors.S bootblock entryother \
-	initcode initcode.out kernel xv6.img fs.img fs2.img kernelmemfs mkfs \
+	initcode initcode.out kernel xv6.img fs.img fs2.img fs3.img kernelmemfs mkfs \
 	.gdbinit \
 	$(UPROGS)
 
@@ -219,6 +222,7 @@ CPUS := 2
 endif
 QEMUOPTS = -drive file=fs.img,index=1,media=disk,format=raw \
 			-drive file=fs2.img,index=2,media=disk,format=raw \
+			-drive file=fs3.img,index=3,media=disk,format=raw \
 			-drive file=xv6.img,index=0,media=disk,format=raw -smp $(CPUS) -m 512 $(QEMUEXTRA)
 
 qemu: fs.img xv6.img

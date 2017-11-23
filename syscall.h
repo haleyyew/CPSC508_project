@@ -22,3 +22,6 @@
 #define SYS_close  21
 #define SYS_open_backup   22
 #define SYS_read_backup   23
+#define SYS_corrupt_file   24
+#define SYS_write_backup   25
+

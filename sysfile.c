@@ -112,11 +112,24 @@ sys_write(void)
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
     return -1;
 
-//    cprintf("===sys_write ");
-//    cprintf("%s",p);
-//    cprintf("\n");
-
   return filewrite(f, p, n);
+}
+
+int
+sys_write_backup(void)
+{
+  struct file *f;
+  int n;
+  char *p;
+
+  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
+    return -1;
+
+    cprintf("===sys_write ");
+    cprintf("%s",p);
+    cprintf("\n");
+
+  return filewrite_backup(f, p, n);
 }
 
 int
@@ -459,6 +472,53 @@ sys_open_backup(void)
   cprintf("\n");
 
   return fd;
+}
+
+int
+sys_corrupt_file(void){
+  char buf[10];
+  strncpy(buf, "????", sizeof("????"));
+
+  char *path;
+  int fd;
+  struct file *f;
+  struct inode *ip;
+  int dev;
+
+  if(argstr(0, &path) < 0  || argint(1, &dev) < 0)
+    return -1;
+
+  begin_op();
+
+
+	if((ip = namei_backup(path, dev)) == 0){
+	  end_op();
+	  return -1;
+	}
+	ilock(ip);
+
+
+  if((f = filealloc()) == 0 || (fd = fdalloc(f)) < 0){
+    if(f)
+      fileclose(f);
+    iunlockput(ip);
+    end_op();
+    return -1;
+  }
+  iunlock(ip);
+  end_op();
+
+  f->type = FD_INODE;
+  f->ip = ip;
+  f->off = 0;
+  f->readable = 1;
+  f->writable = 1;
+
+  cprintf("sys_corrupt_file \n");
+
+  filewrite(f, buf, sizeof(buf));
+
+  return 0;
 }
 
 int
