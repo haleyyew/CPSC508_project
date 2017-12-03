@@ -31,11 +31,11 @@ ls(char *path, uint dev)
   struct stat st;
 
   if (dev == 2){
-	printf(1, "||||| open_backup dev == 2");
+	printf(1, "[ls]: open_backup dev == 2 \n");
 	fd = open_backup(path, 0, 2);
   }
   else {
-	printf(1, "||||| open_backup dev == 1");
+	printf(1, "[ls]: open_backup dev == 1 \n");
 	fd = open(path, 0);
   }
 
@@ -54,7 +54,7 @@ ls(char *path, uint dev)
 
   switch(st.type){
   case T_FILE:
-    printf(1, "%s %d %d %d DEV = %d\n", fmtname(path), st.type, st.ino, st.size, st.dev);
+    printf(1, "%s %d %d %d dev = %d\n", fmtname(path), st.type, st.ino, st.size, st.dev);
     break;
 
   case T_DIR:
@@ -86,14 +86,14 @@ main(int argc, char *argv[])
 {
   int i;
 
-//  if(argc < 2){
-//    ls(".", 1);
-//    exit();
-//  }
   if(argc < 2){
-    ls("testfile", 2);
+    ls(".", 1);
     exit();
   }
+//  if(argc < 2){
+//    ls("testfile2", 2);
+//    exit();
+//  }
   for(i=1; i<argc; i++)
     ls(argv[i], 1);
   exit();

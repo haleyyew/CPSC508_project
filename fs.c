@@ -501,14 +501,14 @@ writei(struct inode *ip, char *src, uint off, uint n)
     return -1;
 
 
-  cprintf("!!!write!!! \n");
   char buf[10];
-  //memset(buf, 0, sizeof(buf));
   strncpy(buf, src, sizeof(buf));
-  cprintf("%x", src);
-  cprintf("-- \n");
-  cprintf("%s", src);
-
+  cprintf("writei: ");
+  cprintf("hex=%x ", src);
+  cprintf("str=%s ", src);
+  cprintf("dev=%d ", ip->dev);
+  cprintf("inum=%d ", ip->inum);
+  cprintf("n=%d \n", n);
 
 
   for(tot=0; tot<n; tot+=m, off+=m, src+=m){
@@ -523,10 +523,6 @@ writei(struct inode *ip, char *src, uint off, uint n)
     ip->size = off;
     iupdate(ip);
   }
-
-	cprintf("-- \n");
-	cprintf("%d \n", n);
-	cprintf("!!!!!! \n");
 
   return n;
 }
@@ -652,7 +648,7 @@ namex(char *path, int nameiparent, char *name)
   }
   else {
     ip = idup(myproc()->cwd);
-    ip->dev = ROOTDEV;
+    ip->dev = ROOTDEV;		// always from ROOTDEV
   }
 
   while((path = skipelem(path, name)) != 0){
@@ -687,17 +683,17 @@ namex_backup(char *path, int nameiparent, char *name, uint dev)
 {
   struct inode *ip, *next;
 
-//  cprintf("namex ");
-//  cprintf(path);
-//  char dev[10];
+  cprintf("namex_backup: ");
+  cprintf(path);
+  cprintf(" dev=%d ", dev);
+  cprintf("\n");
 
   if(*path == '/'){
-    //ip = iget(ROOTDEV, ROOTINO);
 	ip = iget(dev, ROOTINO);
   }
   else {
     ip = idup(myproc()->cwd);
-    ip->dev = dev;
+    ip->dev = dev;		// can specify which DEV
   }
 
   while((path = skipelem(path, name)) != 0){
@@ -709,10 +705,6 @@ namex_backup(char *path, int nameiparent, char *name, uint dev)
     if(nameiparent && *path == '\0'){
       // Stop one level early.
       iunlock(ip);
-
-//      itoa(ip->dev, dev, 10);
-//      cprintf(dev);
-//      cprintf("\n");
 
       return ip;
     }
@@ -727,10 +719,6 @@ namex_backup(char *path, int nameiparent, char *name, uint dev)
     iput(ip);
     return 0;
   }
-
-//  itoa(ip->dev, dev, 10);
-//  cprintf(dev);
-//  cprintf("\n");
 
   return ip;
 }
@@ -747,9 +735,9 @@ namei_backup(char *path, uint dev)
 {
   char name[DIRSIZ];
 
-  if (dev == 2){
-	  cprintf("namei dev == 2");
-	  return namex_backup(path, 0, name, ROOTDEVBKUP);
+  if (dev != ROOTDEV){		// DEVICE 2 or 3
+	  cprintf("namei_backup: dev=%d \n", dev);
+	  return namex_backup(path, 0, name, dev);
   }
 
   return namex(path, 0, name);
@@ -758,9 +746,10 @@ namei_backup(char *path, uint dev)
 struct inode*
 nameiparent(char *path, char *name, uint dev)
 {
-  if (dev == 2){
-	  cprintf("nameiparent dev == 2");
-	  return namex_backup(path, 1, name, ROOTDEVBKUP);
+  if (dev != ROOTDEV){
+	  cprintf("nameiparent: dev=%d \n", dev);
+	  return namex_backup(path, 1, name, dev);
   }
+
   return namex(path, 1, name);
 }

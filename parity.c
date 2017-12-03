@@ -16,7 +16,7 @@ void parity(void* data){
 //	memset(buf, 0, sizeof(buf));
 
 	strncpy(buf, data, 10);
-	cprintf("%s", buf);
+	//cprintf("%s", buf);
 	cprintf("%s", data);
 	cprintf("====== \n");
 }

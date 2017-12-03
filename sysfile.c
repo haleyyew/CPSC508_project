@@ -90,15 +90,14 @@ sys_read_backup(void)
     return -1;
   int num = fileread(f, p, n);
 
-//  struct inode *ip = f->ip;
 
-//  char dev_str[10];
-  cprintf("===sys_read_backup ");
-//  itoa(num, dev_str, 10);
-  cprintf("num= %d res=%s", num, p);
+  cprintf("sys_read_backup: ");
+  cprintf("dev=%d num= %d res=%s", f->ip->dev, num, p);
   cprintf("\n");
 
-  parity(p);
+  parity(p);	// check data
+
+
   return num;
 }
 
@@ -122,12 +121,11 @@ sys_write_backup(void)
   int n;
   char *p;
 
-  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
+  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0){
     return -1;
+  }
 
-    cprintf("===sys_write ");
-    cprintf("%s",p);
-    cprintf("\n");
+  cprintf("sys_write_backup: f=%d n=%d p=%s \n", f, n, p);
 
   return filewrite_backup(f, p, n);
 }
@@ -183,7 +181,7 @@ sys_link(void)
   iupdate(ip);
   iunlock(ip);
 
-  if((dp = nameiparent(new, name, ROOTDEV)) == 0)
+  if((dp = nameiparent(new, name, ROOTDEV)) == 0)		// root
     goto bad;
   ilock(dp);
   if(dp->dev != ip->dev || dirlink(dp, name, ip->inum) < 0){
@@ -235,7 +233,7 @@ sys_unlink(void)
     return -1;
 
   begin_op();
-  if((dp = nameiparent(path, name, ROOTDEV)) == 0){
+  if((dp = nameiparent(path, name, ROOTDEV)) == 0){				// root
     end_op();
     return -1;
   }
@@ -281,7 +279,7 @@ bad:
 }
 
 static struct inode*
-create(char *path, short type, short major, short minor, uint dev)
+create(char *path, short type, short major, short minor, uint dev)			// specify dev
 {
   uint off;
   struct inode *ip, *dp;
@@ -292,7 +290,9 @@ create(char *path, short type, short major, short minor, uint dev)
   ilock(dp);
 
   if((ip = dirlookup(dp, name, &off)) != 0){
-	cprintf("dirlookup(dp, name, &off)) != 0");
+
+	//cprintf("create: dirlookup(dp, name, &off)) != 0");
+
     iunlockput(dp);
     ilock(ip);
     if(type == T_FILE && ip->type == T_FILE)
@@ -323,7 +323,7 @@ create(char *path, short type, short major, short minor, uint dev)
 
   iunlockput(dp);
 
-  cprintf("done create");
+  cprintf("create: path=%s dev=%d \n", path, dev);
 
   return ip;
 }
@@ -343,9 +343,8 @@ sys_open(void)
   begin_op();
 
   if(omode & O_CREATE){
-    ip = create(path, T_FILE, 0, 0, ROOTDEV);
-    cprintf(path);
-    cprintf("\n");
+    ip = create(path, T_FILE, 0, 0, ROOTDEV);	// root
+    cprintf("sys_open: path=%s \n",path);
 
     if(ip == 0){
       end_op();
@@ -380,11 +379,7 @@ sys_open(void)
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
 
-  char dev_str[10];
-  cprintf("sys_open fd ");
-  itoa(fd, dev_str, 10);
-  cprintf(dev_str);
-  cprintf("\n");
+  cprintf("sys_open fd=%d \n", fd);
 
   return fd;
 }
@@ -396,29 +391,19 @@ sys_open_backup(void)
   int fd, omode;
   struct file *f;
   struct inode *ip;
-  int dev;
+  int dev;		// specify dev
 
   if(argstr(0, &path) < 0 || argint(1, &omode) < 0 || argint(2, &dev) < 0)
     return -1;
 
-  char dev_str[10];
-  cprintf("sys_open_backup dev ");
-  itoa((uint) dev, dev_str, 10);
-  cprintf(dev_str);
-  cprintf("\n");
-
-  //struct proc* currproc = myproc();
-  itoa(myproc()->pid, dev_str, 10);
-  cprintf(dev_str);
-  cprintf("\n");
+  cprintf("sys_open_backup: dev=%d pid=%d \n", dev, myproc()->pid);
 
   begin_op();
 
   if(omode & O_CREATE){
-    ip = create(path, T_FILE, 0, 0, dev);
-    cprintf(" path ");
-    cprintf(path);
-    cprintf("\n");
+    ip = create(path, T_FILE, 0, 0, dev);	// specify dev
+
+    cprintf(" sys_open_backup: O_CREATE path= \n", path);
 
     if(ip == 0){
       end_op();
@@ -453,29 +438,19 @@ sys_open_backup(void)
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
 
-  cprintf(" cwd dev ");
+
   struct inode *cwd = myproc()->cwd;
-  itoa(cwd->dev, dev_str, 10);
-  cprintf(dev_str);
-  cprintf(" name ");
-  cprintf(myproc()->name);
-  cprintf(" pid ");
-  itoa(myproc()->pid, dev_str, 10);
-  cprintf(dev_str);
-  cprintf("\n");
+  cprintf(" sys_open_backup: cwd->dev=%d name=%s pid=%d \n", cwd->dev, myproc()->name, myproc()->pid);
 
   //switchuvm(currproc);
 
-  cprintf(" fd ");
-  itoa(fd, dev_str, 10);
-  cprintf(dev_str);
-  cprintf("\n");
+  cprintf(" sys_open_backup: fd= \n", fd);
 
   return fd;
 }
 
 int
-sys_corrupt_file(void){
+sys_corrupt_file(void){			// simulate file content corrupt
   char buf[10];
   strncpy(buf, "????", sizeof("????"));
 
@@ -514,7 +489,7 @@ sys_corrupt_file(void){
   f->readable = 1;
   f->writable = 1;
 
-  cprintf("sys_corrupt_file \n");
+  cprintf("sys_corrupt_file: buf=%s \n", buf);
 
   filewrite(f, buf, sizeof(buf));
 
@@ -528,7 +503,7 @@ sys_mkdir(void)
   struct inode *ip;
 
   begin_op();
-  if(argstr(0, &path) < 0 || (ip = create(path, T_DIR, 0, 0, ROOTDEV)) == 0){
+  if(argstr(0, &path) < 0 || (ip = create(path, T_DIR, 0, 0, ROOTDEV)) == 0){	// root
     end_op();
     return -1;
   }
@@ -548,7 +523,7 @@ sys_mknod(void)
   if((argstr(0, &path)) < 0 ||
      argint(1, &major) < 0 ||
      argint(2, &minor) < 0 ||
-     (ip = create(path, T_DEV, major, minor, ROOTDEV)) == 0){
+     (ip = create(path, T_DEV, major, minor, ROOTDEV)) == 0){	// root
     end_op();
     return -1;
   }
