@@ -26,3 +26,4 @@
 #define SYS_write_backup   25
 #define SYS_init_block_striping	26
 #define SYS_build_block_striping 27
+#define SYS_restore 28

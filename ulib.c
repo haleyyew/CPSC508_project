@@ -130,3 +130,18 @@ itoa (int value, char *result, int base)
     }
     return result;
 }
+
+//https://www.techworld.com.au/article/527677/how_convert_an_ascii_char_binary_string_representation_c/
+void convertBaseVersion(char input, int base, char *output, int digits)
+{
+	int i, remainder;
+	char digitsArray[17] = "0123456789ABCDEF";
+
+	for (i = digits; i > 0; i--)
+	{
+		remainder = input % base;
+		input = input / base;
+		output[i - 1] = digitsArray[remainder];
+	}
+	output[digits] = '\0';
+}

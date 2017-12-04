@@ -648,6 +648,13 @@ int sys_init_block_striping(void){
 
   char buf[16];
   char header[24];
+  int j;
+	for ( j =0; j<16; j++){
+		buf[j] = 0;
+	}
+	for ( j =0; j<24; j++){
+		header[j] = 0;
+	}
 
   itoa(dev1, buf, 10);
   strncpy(header, buf, 8);
@@ -667,6 +674,9 @@ int sys_init_block_striping(void){
 	  return error;
 
   char head_read[24];
+	for ( j =0; j<24; j++){
+		head_read[j] = 0;
+	}
   ilock(f->ip);
   error = readi(ip, head_read, 0, BLOCK_STRIPING_START_ADDR);
   iunlock(f->ip);
@@ -682,14 +692,15 @@ int sys_init_block_striping(void){
 int sys_build_block_striping (void){
   char *path;
   int dev1size;
-  int dev2size;
+
+  char *result;
 
   struct inode *ip;
   struct file *f;
   struct file *f1;
   struct file *f2;
 
-  if(argstr(0, &path) < 0 || argint(1, &dev1size) < 0 || argint(2, &dev2size) < 0 )
+  if(argstr(0, &path) < 0 || argint(1, &dev1size) < 0  || argptr(2, &result, dev1size) < 0)
 	return -1;
 
   int dev1;
@@ -731,7 +742,11 @@ int sys_build_block_striping (void){
 //  uint m = 0;
 //  struct buf *bp;
 //  int n = BLOCK_STRIPING_START_ADDR;
-  char *dst = kalloc();		// 4 KB
+  char dst [32];		// 4 KB
+  int j;
+	for ( j =0; j<32; j++){
+		dst[j] = 0;
+	}
 
   ilock(f->ip);
 //  for(tot=0; tot<n; tot+=m, off+=m, dst+=m){
@@ -748,10 +763,13 @@ int sys_build_block_striping (void){
   iunlock(f->ip);
 
   char header[24];
+	for ( j =0; j<24; j++){
+		header[j] = 0;
+	}
   strncpy(header, &dst[0], 8);
   strncpy(&header[8], &dst[8], 8);
 
-  kfree(dst);
+  //kfree(dst);
 
   dev1 = atoi(header);
   dev2 = atoi(&header[8]);
@@ -804,8 +822,14 @@ int sys_build_block_striping (void){
   int tot;
   char dst1[BSIZE];
   char dst2[BSIZE];
+	for ( j =0; j<BSIZE; j++){
+		dst1[j] = 0;
+	}
+	for ( j =0; j<BSIZE; j++){
+		dst2[j] = 0;
+	}
   int error = -1;
-  char* result_tmp = kalloc();
+  //char* result_tmp = kalloc();
 
   for(tot=0; tot<dev1size; tot+=BSIZE){
 	  ilock(ip1);
@@ -816,17 +840,129 @@ int sys_build_block_striping (void){
 	  readi(ip2, dst2, tot, BSIZE);
 	  iunlock(ip2);
 
-	  parity(dst1, dst2, result_tmp+tot);
+	  parity(dst1, dst2, result+tot);
   }
 
   fileclose(f1);
   fileclose(f2);
 
-//  begin_op();
-//  ilock(ip);
-//  error = writei(ip, result_tmp, BLOCK_STRIPING_START_ADDR, dev1size);
-//  iunlock(ip);
-//  end_op();
+  begin_op();
+  ilock(ip);
+  error = writei(ip, result, BLOCK_STRIPING_START_ADDR, dev1size);
+  iunlock(ip);
+  end_op();
 
   return error;
+}
+
+int
+sys_restore(){
+	  char *path;
+	  int dev;
+	  int size;
+
+	  struct inode *ip;
+	  struct file *f1;
+	  struct file *f2;
+
+	  if(argstr(0, &path) < 0 || argint(1, &dev) < 0 || argint(2, &size) < 0)
+		return -1;
+
+	  int dev1;
+	  int dev2;
+	  int off;
+
+	  if (dev == ROOTDEV){
+		  dev1 = ROOTDEVBKUP;
+		  off = BLOCK_STRIPING_START_ADDR;
+		  dev2 = ROOTDEV2;
+	  }
+
+	  struct inode *ip1;
+	  begin_op();
+	  if((ip1 = namei_backup(path, dev1)) == 0){
+	    end_op();
+	    return -1;
+	  }
+	  f1 = filealloc();
+	  end_op();
+	  f1->type = FD_INODE;
+	  f1->ip = ip1;
+	  f1->off = 0;
+	  f1->readable = 1;
+	  f1->writable = 1;
+
+	  cprintf("sys_restore ip1->inum %d \n", ip1->inum);
+
+	  // read from odd-numbered block pieces from dev 2
+	  struct inode *ip2;
+	  begin_op();
+	  if((ip2 = namei_backup(path, dev2)) == 0){
+	    end_op();
+	    return -1;
+	  }
+	  f2 = filealloc();
+	  end_op();
+	  f2->type = FD_INODE;
+	  f2->ip = ip2;
+	  f2->off = 0;
+	  f2->readable = 1;
+	  f2->writable = 1;
+
+	  cprintf("sys_restore ip2->inum %d \n", ip2->inum);
+
+	  int j;
+	  char dst1[BSIZE];
+	  char dst2[BSIZE];
+	  char result[BSIZE];
+		for ( j =0; j<BSIZE; j++){
+			dst1[j] = 0;
+		}
+		for ( j =0; j<BSIZE; j++){
+			dst2[j] = 0;
+		}
+		for ( j =0; j<BSIZE; j++){
+			result[j] = 0;
+		}
+
+	  int tot;
+	  for(tot=0; tot<size; tot+=BSIZE){
+		  ilock(ip1);
+		  readi(ip1, dst1, tot+off, BSIZE);
+		  iunlock(ip1);
+
+		  ilock(ip2);
+		  readi(ip2, dst2, tot, BSIZE);
+		  iunlock(ip2);
+
+		  parity(dst1, dst2, result+tot);
+	  }
+	  cprintf("sys_restore dst1 0=%s 16=%s  \n", dst1, dst1[24]);
+
+
+	  fileclose(f1);
+	  fileclose(f2);
+
+	  begin_op();
+	  if((ip = namei_backup(path, dev)) == 0){
+	    end_op();
+	    return -1;
+	  }
+	  f1 = filealloc();
+	  end_op();
+	  f1->type = FD_INODE;
+	  f1->ip = ip;
+	  f1->off = 0;
+	  f1->readable = 1;
+	  f1->writable = 1;
+
+	  int error;
+	  begin_op();
+	  ilock(ip);
+	  error = writei(ip, result, 0, sizeof(result));
+	  iunlock(ip);
+	  end_op();
+
+	  return error;
+
 }

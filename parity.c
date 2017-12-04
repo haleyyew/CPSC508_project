@@ -28,7 +28,7 @@ void convertBaseVersion(char input, int base, char *output, int digits)
 //#define LENGTH 16
 
 void parity(char* data1, char* data2, char* xor_result){
-	cprintf("===PARITY===");
+	cprintf("===PARITY=== \n");
 	char buf[10];
 	//strncpy(buf, data1, 10);
 	//cprintf("%s", buf);
@@ -59,7 +59,7 @@ void parity(char* data1, char* data2, char* xor_result){
     for(i=0; i<BSIZE; ++i){
     	convertBaseVersion(xor_result[i], 2, buf, 8);
     	if (strncmp(buf, "00000000", sizeof("00000000"))) {
-            cprintf("i=%d binary=%s data1=%s data2=%s \n", i, buf, &data1[i], &data2[i]);
+            cprintf("i=%d binary=%s data1=%s data2=%s result=%s \n", i, buf, &data1[i], &data2[i], xor_result[i]);
     	}
     }
     cprintf("\n");

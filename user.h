@@ -28,7 +28,8 @@ int read_backup(int, void*, int);
 int corrupt_file(char*, uint);
 int write_backup(int, void*, int);
 int init_block_striping(void*, int, int);
-int build_block_striping(void*, int, int);
+int build_block_striping(void*,  int, void*);
+int restore(void*,  int, int);
 
 // ulib.c
 int stat(char*, struct stat*);
@@ -44,3 +45,4 @@ void* malloc(uint);
 void free(void*);
 int atoi(const char*);
 char* itoa (int value, char *result, int base);
+void convertBaseVersion(char input, int base, char *output, int digits);

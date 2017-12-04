@@ -35,3 +35,5 @@ SYSCALL(corrupt_file)
 SYSCALL(write_backup)
 SYSCALL(init_block_striping)
 SYSCALL(build_block_striping)
+SYSCALL(restore)
+
