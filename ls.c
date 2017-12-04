@@ -30,9 +30,9 @@ ls(char *path, uint dev)
   struct dirent de;
   struct stat st;
 
-  if (dev == 2){
-	printf(1, "[ls]: open_backup dev == 2 \n");
-	fd = open_backup(path, 0, 2);
+  if (dev > 1){
+	printf(1, "[ls]: open_backup dev == %d \n", dev);
+	fd = open_backup(path, 0, dev);
   }
   else {
 	printf(1, "[ls]: open_backup dev == 1 \n");

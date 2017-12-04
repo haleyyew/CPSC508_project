@@ -1,2 +1,2 @@
 
-void parity(void*);
+void parity(void*, void*, void*);

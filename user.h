@@ -27,6 +27,8 @@ int open_backup(char*, int, uint);
 int read_backup(int, void*, int);
 int corrupt_file(char*, uint);
 int write_backup(int, void*, int);
+int init_block_striping(void*, int, int);
+int build_block_striping(void*, int, int);
 
 // ulib.c
 int stat(char*, struct stat*);

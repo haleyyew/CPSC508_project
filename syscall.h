@@ -24,4 +24,5 @@
 #define SYS_read_backup   23
 #define SYS_corrupt_file   24
 #define SYS_write_backup   25
-
+#define SYS_init_block_striping	26
+#define SYS_build_block_striping 27

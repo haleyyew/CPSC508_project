@@ -22,6 +22,7 @@ void            cprintf(char*, ...);
 void            consoleintr(int(*)(void));
 void            panic(char*) __attribute__((noreturn));
 char* 			itoa (int value, char *result, int base);
+int				atoi(const char *s);
 
 // exec.c
 int             exec(char*, char**);
@@ -55,6 +56,8 @@ int             readi(struct inode*, char*, uint, uint);
 void            stati(struct inode*, struct stat*);
 int             writei(struct inode*, char*, uint, uint);
 struct inode* 	namei_backup(char *path, uint dev);
+uint			bmap_backup(struct inode *ip, uint bn);
+uint			min_backup(int a, int b);
 
 // ide.c
 void            ideinit(void);

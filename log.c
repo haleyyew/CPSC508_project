@@ -217,8 +217,10 @@ log_write(struct buf *b)
 
   if (log.lh.n >= LOGSIZE || log.lh.n >= log.size - 1)
     panic("too big a transaction");
-  if (log.outstanding < 1)
+  if (log.outstanding < 1 && log.dev != 2){		// it's okay for dev 2 to write without being a syscall
+	cprintf("%d \n", log.dev);
     panic("log_write outside of trans");
+  }
 
   acquire(&log.lock);
   for (i = 0; i < log.lh.n; i++) {
