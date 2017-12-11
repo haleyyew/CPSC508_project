@@ -280,10 +280,88 @@ void test_raid3(){
 
 	fd = open("testfile3", O_RDWR);
 	  num = read(fd, buf, sizeof(buf));
-	  printf(1, "[main] after retore read num=%d buf=%s \n", num, buf);
+	  printf(1, "[main] after restore, read num=%d buf=%s \n", num, buf);
 	  close(fd);
 }
 
+//http://www.ccodechamp.com/c-program-to-implement-cyclic-redundancy-check-crc/
+void test_reed(){				// use circular redundancy check instead, no correction
+	char t[32],cs[32];
+	char g[]="001110011";		// generator polynomial 1x^2 + 6x^1 + 3x^0
+	int a, e;
+	int N = strlen(g);
+	char t1[32], t2[32];
+
+
+	int fd;
+	fd = open("testfile6", O_CREATE);
+	close(fd);
+	fd = open("testfile6", O_RDWR);
+
+	for (int j =0; j<strlen(t); j++){
+		t[j] = 0;
+	}
+	for (int j =0; j<strlen(t1); j++){
+		t1[j] = 0;
+	}
+	for (int j =0; j<strlen(t2); j++){
+		t2[j] = 0;
+	}
+
+    strcpy(t, "001010011100101");
+    printf(1, "\nWrite data : %s \n", t);		// 5x^4 + 2x^3 + 3x^2 + 4x^1 + 5x^0
+	a=strlen(t);
+
+
+	int error;
+	error = write(fd, t, a);
+	if (error < 0) {
+		printf(1, "[main] write error %d \n", error);
+	} else {
+		printf(1, "[main] write %d bytes to testfile6 \n", error);
+	}
+
+
+	close(fd);
+	fd = open("testfile6", O_RDWR);
+
+	error = read_crc(fd, t1, a);
+	if (error < 0) {
+		printf(1, "[main] read error %d \n", error);
+	} else {
+		printf(1, "[main] read %d bytes from testfile6: %s \n", error, t1);
+	}
+
+	// corrupting data
+	strcpy(t1, "00101001111110101101000");			// 1x^4 + 2x^3 + 3x^2 + 7x^1 + 5x^0
+	printf(1, "\nCorrupt data : %s\n",t1);
+
+
+    crc(cs, t1, g, a, N);
+    for(e=0;(e<N-1) && (cs[e]!='1');e++);
+	if(e<N-1)
+		printf(1, "\nError detected %s \n\n", cs);
+	else
+		printf(1, "\nNo error detected %s \n\n", cs);
+
+	close(fd);
+	fd = open("testfile6", O_RDWR);
+
+	// just read from disk again
+	error = read_crc(fd, t2, a);
+	if (error < 0) {
+		printf(1, "[main] read error %d \n", error);
+	} else {
+		printf(1, "[main] read %d bytes from testfile6 \n", error);
+	}
+
+	crc(cs, t2, g, a, N);
+	for(e=0;(e<N-1) && (cs[e]!='1');e++);
+	if(e<N-1)
+		printf(1, "\nError detected %s \n\n", cs);
+	else
+		printf(1, "\nNo error detected %s \n\n", cs);
+}
 
 //raid 1 mirroring
 //raid 3 block level striping with parity
@@ -301,6 +379,8 @@ main(int argc, char *argv[])
 	  test_raid1();
   } if (i == 3){
 	  test_raid3();
+  } if (i == 6){
+	  test_reed();
   }
 
 

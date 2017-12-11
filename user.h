@@ -30,6 +30,7 @@ int write_backup(int, void*, int);
 int init_block_striping(void*, int, int);
 int build_block_striping(void*,  int, void*);
 int restore(void*,  int, int);
+int read_crc(int, void*, int);
 
 // ulib.c
 int stat(char*, struct stat*);
@@ -46,3 +47,5 @@ void free(void*);
 int atoi(const char*);
 char* itoa (int value, char *result, int base);
 void convertBaseVersion(char input, int base, char *output, int digits);
+void xor(char* cs, char* g, int N);
+void crc(char* cs, char* t, char* g, int a, int N);

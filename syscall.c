@@ -110,6 +110,7 @@ extern int sys_write_backup(void);
 extern int sys_init_block_striping(void);
 extern int sys_build_block_striping(void);
 extern int sys_restore(void);
+extern int sys_read_crc(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -140,6 +141,7 @@ static int (*syscalls[])(void) = {
 [SYS_init_block_striping] sys_init_block_striping,
 [SYS_build_block_striping] sys_build_block_striping,
 [SYS_restore] sys_restore,
+[SYS_read_crc] sys_read_crc,
 
 };
 

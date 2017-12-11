@@ -966,3 +966,24 @@ sys_restore(){
 	  return error;
 
 }
+
+int
+sys_read_crc(){
+	  struct file *f;
+	  int n;
+	  char *p;
+
+	  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argptr(1, &p, n) < 0)
+	    return -1;
+
+		for (int j =0; j<n; j++){
+			p[j] = 0;
+		}
+
+	  int num = readi(f->ip, p, f->off, n);
+	  if (num < 0) return -1;
+
+	  cprintf( "\n read_crc is : %s , %d bytes \n",p, num);
+
+	  return circular_redundancy_check_encode(p);
+}

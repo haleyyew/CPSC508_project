@@ -145,3 +145,22 @@ void convertBaseVersion(char input, int base, char *output, int digits)
 	}
 	output[digits] = '\0';
 }
+
+void xor(char* cs, char* g, int N){
+	int c;
+    for(c = 1;c < N; c++)
+    cs[c] = (( cs[c] == g[c])?'0':'1');
+}
+
+void crc(char* cs, char* t, char* g, int a, int N){
+	int e, c;
+    for(e=0;e<N;e++)
+        cs[e]=t[e];
+    do{
+        if(cs[0]=='1')
+            xor(cs, g, N);
+        for(c=0;c<N-1;c++)
+            cs[c]=cs[c+1];
+        cs[c]=t[e++];
+    }while(e<=a+N-1);
+}
