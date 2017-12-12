@@ -29,12 +29,14 @@ void test_raid1(){
 	  strcpy(buf, "test");
 	  strcpy(buf2, "test");
 
-	  printf(1, "[main] create open testfile \n");
+	  printf(1, "--------------------------------------- \n");
+
+	  printf(1, "[main] open() create testfile dev=1 \n");
 
 	  fd = open("testfile", O_CREATE);
 	  fd = open("testfile", O_RDWR);
 
-	  printf(1, "[main] before write testfile buf=%s \n", buf);
+	  printf(1, "[main] before write() testfile buf=%s \n", buf);
 
 	  write(fd, buf, sizeof(buf));
 
@@ -45,29 +47,30 @@ void test_raid1(){
 	  itoa(stat->ino, ino, 10);
 	  itoa(stat->nlink, nlink, 10);
 	  itoa(stat->size, size, 10);
-	  if (error == 0){
-		  printf(1, "[main] fstat type=%s dev=%s ino=%s nlink=%s size=%s \n", type, dev, ino, nlink, size);
+	  if (error < 0){
+		  printf(1, "[main] fstat error %d \n", error);
+		  //printf(1, "[main] fstat type=%s dev=%s ino=%s nlink=%s size=%s \n", type, dev, ino, nlink, size);
 	  }
 
 	  fd = open("testfile", O_RDWR);
 	  num = read(fd, buf3, sizeof(buf));
 
-	  printf(1, "[main] after read num=%d buf3=%s \n", num, buf3);
+	  printf(1, "[main] after read() num=%d buf3=%s \n", num, buf3);
 	  close(fd);
 
 	  printf(1, "----- \n");
 
 	  for (int i = 2; i < 4; i++) {
-		  printf(1, "[main] create open_backup testfile \n");
+		  printf(1, "[main] open() create testfile dev=%d \n", i);
 
 		  fd2 = open_backup("testfile", O_CREATE, i);
 		  fd2 = open_backup("testfile", O_RDWR, i);
 
-		  printf(1, "[main] before write_backup testfile buf2=%s \n", buf2);
+		  printf(1, "[main] before write() testfile dev=%d buf2=%s \n", i, buf2);
 
 		  error = write_backup(fd2, buf2, sizeof(buf2));
 		  if (error < 0){
-			  printf(1, "[main] write_backup error %d \n", error);
+			  printf(1, "[main] write() error %d \n", error);
 		  }
 
 		  error = fstat(fd2, stat);
@@ -77,16 +80,15 @@ void test_raid1(){
 		  itoa(stat->ino, ino, 10);
 		  itoa(stat->nlink, nlink, 10);
 		  itoa(stat->size, size, 10);
-		  if (error == 0){
-			  printf(1, "[main] fstat type=%s dev=%s ino=%s nlink=%s size=%s \n", type, dev, ino, nlink, size);
-		  } else {
+		  if (error < 0){
+			  //printf(1, "[main] fstat type=%s dev=%s ino=%s nlink=%s size=%s \n", type, dev, ino, nlink, size);
 			  printf(1, "[main] fstat error %d \n", error);
 		  }
 
 		  fd2 = open_backup("testfile", O_RDWR, i);
 		  num = read(fd2, buf4, sizeof(buf4));
 
-		  printf(1, "[main] after read num=%d buf4=%s \n", num, buf4);
+		  printf(1, "[main] after read() dev=%d num=%d buf4=%s \n", i, num, buf4);
 		  close(fd2);
 
 		  printf(1, "----- \n");
@@ -98,7 +100,7 @@ void test_raid1(){
 	  fd = open("testfile", O_RDWR);
 	  num = read(fd, buf5, sizeof(buf5));
 
-	  printf(1, "[main] after corrupt_file read num=%d buf5=%s \n", num, buf5);
+	  printf(1, "[main] after corrupt_file(): read() dev=1 num=%d buf5=%s \n", num, buf5);
 	  close(fd);
 
 	  printf(1, "----- \n");
@@ -106,17 +108,17 @@ void test_raid1(){
 	  for(int i = 2; i < 4; i++){
 		  fd2 = open_backup("testfile", O_RDWR, i);
 		  num = read_backup(fd2, buf6, sizeof(buf6));
-		  printf(1, "[main] from backup read num=%d buf6=%s \n", num, buf6);
+		  printf(1, "[main] from backup read() dev=%d num=%d buf6=%s \n", i, num, buf6);
 	  }
 
 
 	  fd = open("testfile", O_RDWR);
 	  num = write(fd, buf6, sizeof(buf6));
-	  printf(1, "[main] from backup write num=%d bytes to dev 1 \n", num);
+	  printf(1, "[main] from backup write() dev=%d num=%d bytes to dev=1 \n", num);
 
 	  fd = open("testfile", O_RDWR);
 	  num = read(fd, buf7, sizeof(buf7));
-	  printf(1, "[main] recovered read num=%d buf7=%s \n", num, buf7);
+	  printf(1, "[main] recovered read() dev=1 num=%d buf7=%s \n", num, buf7);
 	  close(fd);
 }
 
@@ -147,8 +149,9 @@ void test_raid3(){
 //	strcpy(&data[1024], "BLOCK3");
 //	strcpy(&data[1536], "BLOCK4");
 
-	printf(1, "[main] data at 0=%s \n", &data[0]);
-	printf(1, "[main] data at 512=%s \n", &data[512]);
+	printf(1, "--------------------------------------- \n");
+	printf(1, "[main] data at [0]=%s \n", &data[0]);
+	printf(1, "[main] data at [512]=%s \n", &data[512]);
 //	printf(1, "[main] data at 1024=%s \n", &data[1024]);
 //	printf(1, "[main] data at 1536=%s \n", &data[1536]);
 
@@ -172,9 +175,9 @@ void test_raid3(){
 	strcpy(&data_piece2and4[0], &data[512]);
 //	strcpy(&data_piece2and4[512], &data[1536]);
 
-	printf(1, "[main] data_piece1and3 at 0=%s \n", &data_piece1and3[0]);
+	printf(1, "[main] data_piece1 at [0]=%s \n", &data_piece1and3[0]);
 //	printf(1, "[main] data_piece1and3 at 512=%s \n", &data_piece1and3[512]);
-	printf(1, "[main] data_piece2and4 at 0=%s \n", &data_piece2and4[0]);
+	printf(1, "[main] data_piece2 at [0]=%s \n", &data_piece2and4[0]);
 //	printf(1, "[main] data_piece2and4 at 512=%s \n", &data_piece2and4[512]);
 
 	int fd, fd2;
@@ -189,7 +192,7 @@ void test_raid3(){
 	if (error < 0) {
 		printf(1, "[main] write error %d \n", error);
 	} else {
-		printf(1, "[main] write %d bytes to testfile3 \n", error);
+		printf(1, "[main] write() %d bytes to testfile3 dev=1 \n", error);
 	}
 
 	fd2 = open_backup("testfile3", O_RDWR, ROOTDEV2);
@@ -197,7 +200,7 @@ void test_raid3(){
 	if (error < 0) {
 		printf(1, "[main] write error %d \n", error);
 	} else {
-		printf(1, "[main] write %d bytes to testfile3 \n", error);
+		printf(1, "[main] write() %d bytes to testfile3 dev=%d\n", error, ROOTDEV2);
 	}
 
 	close(fd);
@@ -215,7 +218,8 @@ void test_raid3(){
 //	read(fd, &data_read[1024], block_size);
 //	read_backup(fd2, &data_read[1536], block_size);
 //	printf(1, "[main] data_read at 0=%s 512=%s 1024=%s 1536=%s \n", &data_read[0], &data_read[512], &data_read[1024], &data_read[1536]);
-	printf(1, "[main] data_read at 0=%s 512=%s \n", &data_read[0], &data_read[512]);
+	printf(1, "[main] data_read at [0]=%s [512]=%s \n", &data_read[0], &data_read[512]);
+
 
 	free(data_piece1and3);
 	free(data_piece2and4);
@@ -225,6 +229,9 @@ void test_raid3(){
 	close(fd);
 	close(fd2);
 
+	printf(1, "----- \n");
+
+	printf(1, "[main] preparing for parity disk by XOR dev=%d and dev=% \n", ROOTDEV, ROOTDEV2);
 	init_block_striping("testfile3", ROOTDEV, ROOTDEV2);
 
 	//printf(1, "[main] sizeof data pieces=%d %d \n", sizeof(data_piece1and3), sizeof(data_piece2and4));
@@ -238,7 +245,7 @@ void test_raid3(){
 		if (error < 0) {
 			printf(1, "[main] write error %d \n", error);
 		} else {
-			printf(1, "[main] write %d bytes to testfile3 \n", error);
+			printf(1, "[main] write() %d bytes to testfile3 \n", error);
 		}
 
 	int i;
@@ -246,7 +253,8 @@ void test_raid3(){
     for(i=0; i<block_size; ++i){
     	convertBaseVersion(result[i], 2, buf, 8);
     	if (strcmp(buf, "00000000")) {
-            printf(1, "i=%d binary=%s \n", i, buf);
+
+            //printf(1, "i=%d binary=%s \n", i, buf);
     	}
     }
 
@@ -263,7 +271,7 @@ void test_raid3(){
 	  fd = open("testfile3", O_RDWR);
 
 	  int num = read(fd, buf, sizeof(buf));
-	  printf(1, "[main] after corrupt_file read num=%d buf=%s \n", num, buf);
+	  printf(1, "[main] after corrupt_file(): read() dev=1 num=%d buf=%s \n", num, buf);
 	  close(fd);
 
     // suppose testfile3 on ROOTDEV is corrupted, now want to restore using the other 2 disks
@@ -271,7 +279,7 @@ void test_raid3(){
 	if (error < 0) {
 		printf(1, "[main] restore error %d \n", error);
 	} else {
-		printf(1, "[main] restore %d bytes to testfile3 \n", error);
+		printf(1, "[main] restore() %d bytes to testfile3 on dev=%d \n", error, ROOTDEV);
 	}
 
 	for ( j =0; j<16; j++){
@@ -291,7 +299,7 @@ void test_reed(){				// use circular redundancy check instead, no correction
 	int a, e;
 	int N = strlen(g);
 	char t1[32], t2[32];
-
+	printf(1, "--------------------------------------- \n");
 
 	int fd;
 	fd = open("testfile6", O_CREATE);
@@ -309,7 +317,7 @@ void test_reed(){				// use circular redundancy check instead, no correction
 	}
 
     strcpy(t, "001010011100101");
-    printf(1, "\nWrite data : %s \n", t);		// 5x^4 + 2x^3 + 3x^2 + 4x^1 + 5x^0
+    printf(1, "[main] Write data : %s \n", t);		// 5x^4 + 2x^3 + 3x^2 + 4x^1 + 5x^0
 	a=strlen(t);
 
 
@@ -334,15 +342,15 @@ void test_reed(){				// use circular redundancy check instead, no correction
 
 	// corrupting data
 	strcpy(t1, "00101001111110101101000");			// 1x^4 + 2x^3 + 3x^2 + 7x^1 + 5x^0
-	printf(1, "\nCorrupt data : %s\n",t1);
+	printf(1, "[main] Corrupt data : %s\n",t1);
 
 
     crc(cs, t1, g, a, N);
     for(e=0;(e<N-1) && (cs[e]!='1');e++);
 	if(e<N-1)
-		printf(1, "\nError detected %s \n\n", cs);
+		printf(1, "[main] Error detected %s \n", cs);
 	else
-		printf(1, "\nNo error detected %s \n\n", cs);
+		printf(1, "[main] No error detected %s \n", cs);
 
 	close(fd);
 	fd = open("testfile6", O_RDWR);
@@ -358,9 +366,9 @@ void test_reed(){				// use circular redundancy check instead, no correction
 	crc(cs, t2, g, a, N);
 	for(e=0;(e<N-1) && (cs[e]!='1');e++);
 	if(e<N-1)
-		printf(1, "\nError detected %s \n\n", cs);
+		printf(1, "[main] Error detected %s \n", cs);
 	else
-		printf(1, "\nNo error detected %s \n\n", cs);
+		printf(1, "[main] No error detected %s \n", cs);
 }
 
 //raid 1 mirroring

@@ -1,0 +1,91 @@
+$ raid 1
+--------------------------------------- 
+[main] open() create testfile dev=1 
+[main] before write() testfile buf=test 
+[main] after read() num=10 buf3=test 
+----- 
+[main] open() create testfile dev=2 
+[os] nameiparent: dev=2 
+[os] sys_open_backup: cwd->dev=2 name=raid pid=3  fd=5 
+[os] namei: dev=2 
+[os] sys_open_backup: cwd->dev=2 name=raid pid=3  fd=6 
+[main] before write() testfile dev=2 buf2=test 
+[os] namei: dev=2 
+[os] sys_open_backup: cwd->dev=2 name=raid pid=3  fd=7 
+[main] after read() dev=2 num=10 buf4=test 
+----- 
+[main] open() create testfile dev=3 
+[os] nameiparent: dev=3 
+[os] sys_open_backup: cwd->dev=3 name=raid pid=3  fd=7 
+[os] namei: dev=3 
+[os] sys_open_backup: cwd->dev=3 name=raid pid=3  fd=8 
+[main] before write() testfile dev=3 buf2=test 
+[os] namei: dev=3 
+[os] sys_open_backup: cwd->dev=3 name=raid pid=3  fd=9 
+[main] after read() dev=3 num=10 buf4=test 
+----- 
+[os] sys_corrupt_file: buf=???? 
+[main] after corrupt_file(): read() dev=1 num=10 buf5=???? 
+----- 
+[os] namei: dev=2 
+[os] sys_open_backup: cwd->dev=2 name=raid pid=3  fd=10 
+[main] from backup read() dev=2 num=10 buf6=test 
+[os] namei: dev=3 
+[os] sys_open_backup: cwd->dev=3 name=raid pid=3  fd=11 
+[main] from backup read() dev=3 num=10 buf6=test 
+[main] from backup write() dev=10 num=0 bytes to dev=1 
+[main] recovered read() dev=1 num=10 buf7=test 
+$ raid 3
+--------------------------------------- 
+[main] data at [0]=BLOCK1 
+[main] data at [512]=BLOCK2 
+[main] data_piece1 at [0]=BLOCK1 
+[main] data_piece2 at [0]=BLOCK2 
+[os] nameiparent: dev=3 
+[os] sys_open_backup: cwd->dev=3 name=raid pid=4  fd=4 
+[main] write() 512 bytes to testfile3 dev=1 
+[os] namei: dev=3 
+[os] sys_open_backup: cwd->dev=3 name=raid pid=4  fd=6 
+[main] write() 512 bytes to testfile3 dev=3
+[os] namei: dev=3 
+[os] sys_open_backup: cwd->dev=3 name=raid pid=4  fd=6 
+[main] data_read at [0]=BLOCK1 [512]=BLOCK2 
+----- 
+[main] preparing for parity disk by XOR dev=1 and dev=% 
+[os] sys_init_block_striping: path=testfile3 using dev1=1 dev2=3 
+[os] nameiparent: dev=2 
+[os] sys_init_block_striping: header [0]=1 [8]=3 
+[os] sys_build_block_striping path=testfile3 
+[os] namei: dev=2 
+[os] sys_build_block_striping: header [0]=1 [8]=3 
+[os] namei: dev=3 
+[main] write() 512 bytes to testfile3 
+[os] sys_corrupt_file: buf=???? 
+[main] after corrupt_file(): read() dev=1 num=16 buf=???? 
+[os] namei: dev=2 
+[os] sys_restore ip1->inum 16 
+[os] namei: dev=3 
+[os] sys_restore ip2->inum 21 
+[os] sys_restore result=BLOCK1  
+[main] restore() 512 bytes to testfile3 on dev=1 
+[main] after restore, read num=16 buf=BLOCK1 
+$ raid 6
+--------------------------------------- 
+[main] Write data : 001010011100101 
+[main] write 15 bytes to testfile6 
+[os] from disk read() is : 001010011100101 , 15 bytes 
+[os] Generator polynomial : 001110011
+[os] Modified data is : 00101001110010100000000
+[os] Checksum is : 01101000 
+[os] Final codeword is : 00101001110010101101000
+[main] read 23 bytes from testfile6: 00101001110010101101000 
+[main] Corrupt data : 00101001111110101101000
+[main] Error detected 00010111 
+----- 
+[os] from disk read() is : 001010011100101 , 15 bytes 
+[os] Generator polynomial : 001110011
+[os] Modified data is : 00101001110010100000000
+[os] Checksum is : 01101000 
+[os] Final codeword is : 00101001110010101101000
+[main] read 23 bytes from testfile6 
+[main] No error detected 00000000 

@@ -28,7 +28,7 @@ void convertBaseVersion(char input, int base, char *output, int digits)
 //#define LENGTH 16
 
 void parity(char* data1, char* data2, char* xor_result){
-	cprintf("===PARITY=== \n");
+	//cprintf("===PARITY=== \n");
 	char buf[10];
 	//strncpy(buf, data1, 10);
 	//cprintf("%s", buf);
@@ -59,10 +59,10 @@ void parity(char* data1, char* data2, char* xor_result){
     for(i=0; i<BSIZE; ++i){
     	convertBaseVersion(xor_result[i], 2, buf, 8);
     	if (strncmp(buf, "00000000", sizeof("00000000"))) {
-            cprintf("i=%d binary=%s data1=%s data2=%s result=%s \n", i, buf, &data1[i], &data2[i], xor_result[i]);
+            //cprintf("i=%d binary=%s data1=%s data2=%s result=%s \n", i, buf, &data1[i], &data2[i], xor_result[i]);
     	}
     }
-    cprintf("\n");
+    //cprintf("\n");
 }
 
 void xor(char* cs, char* g, int N){
@@ -90,19 +90,19 @@ int circular_redundancy_check_encode(char* t){
 	int a, e;
 	int N = strlen(g);
 
-    cprintf( "\nGenerator polynomial : %s",g);
+    cprintf( "[os] Generator polynomial : %s\n",g);
     a=strlen(t);
     for(e=a;e<a+N-1;e++)
         t[e]='0';
 
-    cprintf( "\nModified data is : %s",t);
+    cprintf( "[os] Modified data is : %s\n",t);
 
     crc(cs, t, g, a, N);
-    cprintf( "\nChecksum is : %s",cs);
+    cprintf( "[os] Checksum is : %s \n",cs);
     for(e=a;e<a+N-1;e++)
         t[e]=cs[e-a];
 
-    cprintf( "\nFinal codeword is : %s\n",t);
+    cprintf( "[os] Final codeword is : %s\n",t);
 
     int n = strlen(t);
 

@@ -542,12 +542,12 @@ writei(struct inode *ip, char *src, uint off, uint n)
 
   char buf[10];
   strncpy(buf, src, sizeof(buf));
-  cprintf("writei: ");
-  cprintf("hex=%x ", src);
-  cprintf("str=%s ", src);
-  cprintf("dev=%d ", ip->dev);
-  cprintf("inum=%d ", ip->inum);
-  cprintf("n=%d \n", n);
+  //cprintf("writei: ");
+  //cprintf("hex=%x ", src);
+  //cprintf("str=%s ", src);
+  //cprintf("dev=%d ", ip->dev);
+  //cprintf("inum=%d ", ip->inum);
+  //cprintf("n=%d \n", n);
 
 
   for(tot=0; tot<n; tot+=m, off+=m, src+=m){
@@ -722,10 +722,10 @@ namex_backup(char *path, int nameiparent, char *name, uint dev)
 {
   struct inode *ip, *next;
 
-  cprintf("namex_backup: ");
-  cprintf(path);
-  cprintf(" dev=%d ", dev);
-  cprintf("\n");
+  //cprintf("namex_backup: ");
+  //cprintf(path);
+  //cprintf(" dev=%d ", dev);
+  //cprintf("\n");
 
   if(*path == '/'){
 	ip = iget(dev, ROOTINO);
@@ -775,7 +775,7 @@ namei_backup(char *path, uint dev)
   char name[DIRSIZ];
 
   if (dev != ROOTDEV){		// DEVICE 2 or 3
-	  cprintf("namei_backup: dev=%d \n", dev);
+	  cprintf("[os] namei: dev=%d \n", dev);
 	  return namex_backup(path, 0, name, dev);
   }
 
@@ -786,7 +786,7 @@ struct inode*
 nameiparent(char *path, char *name, uint dev)
 {
   if (dev != ROOTDEV){
-	  cprintf("nameiparent: dev=%d \n", dev);
+	  cprintf("[os] nameiparent: dev=%d \n", dev);
 	  return namex_backup(path, 1, name, dev);
   }
 

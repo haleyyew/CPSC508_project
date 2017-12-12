@@ -92,9 +92,9 @@ sys_read_backup(void)
   int num = fileread(f, p, n);
 
 
-  cprintf("sys_read_backup: ");
-  cprintf("dev=%d num= %d res=%s", f->ip->dev, num, p);
-  cprintf("\n");
+  //cprintf("sys_read_backup: ");
+  //cprintf("dev=%d num= %d res=%s", f->ip->dev, num, p);
+  //cprintf("\n");
 
   //parity(p);	// check data
 
@@ -126,7 +126,7 @@ sys_write_backup(void)
     return -1;
   }
 
-  cprintf("sys_write_backup: f=%d n=%d p=%s \n", f, n, p);
+  //cprintf("sys_write_backup: f=%d n=%d p=%s \n", f, n, p);
 
   return filewrite_backup(f, p, n);
 }
@@ -324,7 +324,7 @@ create(char *path, short type, short major, short minor, uint dev)			// specify 
 
   iunlockput(dp);
 
-  cprintf("create: path=%s dev=%d \n", path, dev);
+  //cprintf("create: path=%s dev=%d \n", path, dev);
 
   return ip;
 }
@@ -345,7 +345,7 @@ sys_open(void)
 
   if(omode & O_CREATE){
     ip = create(path, T_FILE, 0, 0, ROOTDEV);	// root
-    cprintf("sys_open: path=%s \n",path);
+    //cprintf("sys_open: path=%s \n",path);
 
     if(ip == 0){
       end_op();
@@ -380,7 +380,7 @@ sys_open(void)
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
 
-  cprintf("sys_open fd=%d \n", fd);
+  //cprintf("sys_open fd=%d \n", fd);
 
   return fd;
 }
@@ -397,14 +397,14 @@ sys_open_backup(void)
   if(argstr(0, &path) < 0 || argint(1, &omode) < 0 || argint(2, &dev) < 0)
     return -1;
 
-  cprintf("sys_open_backup: dev=%d pid=%d \n", dev, myproc()->pid);
+  //cprintf("sys_open_backup: dev=%d pid=%d \n", dev, myproc()->pid);
 
   begin_op();
 
   if(omode & O_CREATE){
     ip = create(path, T_FILE, 0, 0, dev);	// specify dev
 
-    cprintf(" sys_open_backup: O_CREATE path= \n", path);
+    //cprintf(" sys_open_backup: O_CREATE path= \n", path);
 
     if(ip == 0){
       end_op();
@@ -441,9 +441,9 @@ sys_open_backup(void)
 
 
   struct inode *cwd = myproc()->cwd;
-  cprintf(" sys_open_backup: cwd->dev=%d name=%s pid=%d \n", cwd->dev, myproc()->name, myproc()->pid);
-  //switchuvm(currproc);
-  cprintf(" sys_open_backup: fd= \n", fd);
+  cprintf("[os] sys_open_backup: cwd->dev=%d name=%s pid=%d ", cwd->dev, myproc()->name, myproc()->pid);
+  ////switchuvm(currproc);
+  cprintf(" fd=%d \n", fd);
 
   return fd;
 }
@@ -488,7 +488,7 @@ sys_corrupt_file(void){			// simulate file content corrupt
   f->readable = 1;
   f->writable = 1;
 
-  cprintf("sys_corrupt_file: buf=%s \n", buf);
+  cprintf("[os] sys_corrupt_file: buf=%s \n", buf);
 
   filewrite(f, buf, sizeof(buf));
 
@@ -619,7 +619,7 @@ int sys_init_block_striping(void){
   if(argstr(0, &path) < 0 || argint(1, &dev1) < 0 || argint(2, &dev2) < 0)
     return -1;
 
-  cprintf("sys_init_block_striping: path=%s dev1=%d dev2=%d \n", path, dev1, dev2);
+  cprintf("[os] sys_init_block_striping: path=%s using dev1=%d dev2=%d \n", path, dev1, dev2);
 
   begin_op();
 
@@ -644,7 +644,7 @@ int sys_init_block_striping(void){
   f->readable = 1;
   f->writable = 1;
 
-  cprintf("sys_init_block_striping: ip->inum=%d f->ip->inum=%d \n", ip->inum, f->ip->inum);
+  //cprintf("[os] sys_init_block_striping: ip->inum=%d f->ip->inum=%d \n", ip->inum, f->ip->inum);
 
   char buf[16];
   char header[24];
@@ -661,7 +661,7 @@ int sys_init_block_striping(void){
   itoa(dev2, buf, 10);
   strncpy(&header[8], buf, 8);
 
-  cprintf("sys_init_block_striping: header 0=%s 8=%s \n", header, &header[8]);
+  cprintf("[os] sys_init_block_striping: header [0]=%s [8]=%s \n", header, &header[8]);
 
   int error;
   begin_op();
@@ -684,7 +684,7 @@ int sys_init_block_striping(void){
   if (error < 0)
 	  return error;
 
-  cprintf("sys_init_block_striping: head_read 0=%s 8=%s \n", head_read, &head_read[8]);
+  //cprintf("[os] sys_init_block_striping: head_read 0=%s 8=%s \n", head_read, &head_read[8]);
 
   return error;
 }
@@ -706,7 +706,7 @@ int sys_build_block_striping (void){
   int dev1;
   int dev2;
 
-  cprintf("sys_build_block_striping path=%s \n", path);
+  cprintf("[os] sys_build_block_striping path=%s \n", path);
 
   // open init block_striping from backup
   begin_op();
@@ -734,7 +734,7 @@ int sys_build_block_striping (void){
 	f->readable = 1;
 	f->writable = 1;
 
-  cprintf("sys_build_block_striping ip->inum %d \n", ip->inum);
+  //cprintf("sys_build_block_striping ip->inum %d \n", ip->inum);
 
   // read the header
 //  uint off= 0;
@@ -773,7 +773,7 @@ int sys_build_block_striping (void){
 
   dev1 = atoi(header);
   dev2 = atoi(&header[8]);
-  cprintf("sys_build_block_striping: dst 0=%d 8=%d \n", dev1, dev2);
+  cprintf("[os] sys_build_block_striping: header [0]=%d [8]=%d \n", dev1, dev2);
 
   // read from odd-numbered block pieces from dev 1
   struct inode *ip1;
@@ -790,7 +790,7 @@ int sys_build_block_striping (void){
   f1->readable = 1;
   f1->writable = 1;
 
-  cprintf("sys_build_block_striping ip1->inum %d \n", ip1->inum);
+  //cprintf("sys_build_block_striping ip1->inum %d \n", ip1->inum);
 
   // read from odd-numbered block pieces from dev 2
   struct inode *ip2;
@@ -807,7 +807,7 @@ int sys_build_block_striping (void){
   f2->readable = 1;
   f2->writable = 1;
 
-  cprintf("sys_build_block_striping ip2->inum %d \n", ip2->inum);
+  //cprintf("sys_build_block_striping ip2->inum %d \n", ip2->inum);
 
 //  char dst1[dev1size];
 //  ilock(ip1);
@@ -892,7 +892,7 @@ sys_restore(){
 	  f1->readable = 1;
 	  f1->writable = 1;
 
-	  cprintf("sys_restore ip1->inum %d \n", ip1->inum);
+	  cprintf("[os] sys_restore ip1->inum %d \n", ip1->inum);
 
 	  // read from odd-numbered block pieces from dev 2
 	  struct inode *ip2;
@@ -909,7 +909,7 @@ sys_restore(){
 	  f2->readable = 1;
 	  f2->writable = 1;
 
-	  cprintf("sys_restore ip2->inum %d \n", ip2->inum);
+	  cprintf("[os] sys_restore ip2->inum %d \n", ip2->inum);
 
 	  int j;
 	  char dst1[BSIZE];
@@ -937,7 +937,7 @@ sys_restore(){
 
 		  parity(dst1, dst2, result+tot);
 	  }
-	  cprintf("sys_restore dst1 0=%s 16=%s  \n", dst1, dst1[24]);
+	  cprintf("[os] sys_restore result=%s  \n", result);
 
 
 	  fileclose(f1);
@@ -983,7 +983,7 @@ sys_read_crc(){
 	  int num = readi(f->ip, p, f->off, n);
 	  if (num < 0) return -1;
 
-	  cprintf( "\n read_crc is : %s , %d bytes \n",p, num);
+	  cprintf( "[os] from disk read() is : %s , %d bytes \n",p, num);
 
 	  return circular_redundancy_check_encode(p);
 }
