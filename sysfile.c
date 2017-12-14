@@ -92,10 +92,6 @@ sys_read_backup(void)
   int num = fileread(f, p, n);
 
 
-  //cprintf("sys_read_backup: ");
-  //cprintf("dev=%d num= %d res=%s", f->ip->dev, num, p);
-  //cprintf("\n");
-
   //parity(p);	// check data
 
 
@@ -126,7 +122,7 @@ sys_write_backup(void)
     return -1;
   }
 
-  //cprintf("sys_write_backup: f=%d n=%d p=%s \n", f, n, p);
+
 
   return filewrite_backup(f, p, n);
 }
@@ -292,7 +288,6 @@ create(char *path, short type, short major, short minor, uint dev)			// specify 
 
   if((ip = dirlookup(dp, name, &off)) != 0){
 
-	//cprintf("create: dirlookup(dp, name, &off)) != 0");
 
     iunlockput(dp);
     ilock(ip);
@@ -324,7 +319,6 @@ create(char *path, short type, short major, short minor, uint dev)			// specify 
 
   iunlockput(dp);
 
-  //cprintf("create: path=%s dev=%d \n", path, dev);
 
   return ip;
 }
@@ -345,7 +339,7 @@ sys_open(void)
 
   if(omode & O_CREATE){
     ip = create(path, T_FILE, 0, 0, ROOTDEV);	// root
-    //cprintf("sys_open: path=%s \n",path);
+
 
     if(ip == 0){
       end_op();
@@ -380,7 +374,6 @@ sys_open(void)
   f->readable = !(omode & O_WRONLY);
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
 
-  //cprintf("sys_open fd=%d \n", fd);
 
   return fd;
 }
@@ -397,14 +390,13 @@ sys_open_backup(void)
   if(argstr(0, &path) < 0 || argint(1, &omode) < 0 || argint(2, &dev) < 0)
     return -1;
 
-  //cprintf("sys_open_backup: dev=%d pid=%d \n", dev, myproc()->pid);
 
   begin_op();
 
   if(omode & O_CREATE){
     ip = create(path, T_FILE, 0, 0, dev);	// specify dev
 
-    //cprintf(" sys_open_backup: O_CREATE path= \n", path);
+
 
     if(ip == 0){
       end_op();
@@ -644,7 +636,6 @@ int sys_init_block_striping(void){
   f->readable = 1;
   f->writable = 1;
 
-  //cprintf("[os] sys_init_block_striping: ip->inum=%d f->ip->inum=%d \n", ip->inum, f->ip->inum);
 
   char buf[16];
   char header[24];
@@ -684,7 +675,7 @@ int sys_init_block_striping(void){
   if (error < 0)
 	  return error;
 
-  //cprintf("[os] sys_init_block_striping: head_read 0=%s 8=%s \n", head_read, &head_read[8]);
+
 
   return error;
 }
@@ -734,14 +725,9 @@ int sys_build_block_striping (void){
 	f->readable = 1;
 	f->writable = 1;
 
-  //cprintf("sys_build_block_striping ip->inum %d \n", ip->inum);
 
   // read the header
-//  uint off= 0;
-//  uint tot= 0;
-//  uint m = 0;
-//  struct buf *bp;
-//  int n = BLOCK_STRIPING_START_ADDR;
+
   char dst [32];		// 4 KB
   int j;
 	for ( j =0; j<32; j++){
@@ -749,15 +735,7 @@ int sys_build_block_striping (void){
 	}
 
   ilock(f->ip);
-//  for(tot=0; tot<n; tot+=m, off+=m, dst+=m){
-//      bp = bread(ip->dev, bmap_backup(ip, off/BSIZE));
-//      m = min_backup(n - tot, BSIZE - off%BSIZE);
-//
-//      cprintf("sys_build_block_striping m=%d \n", m);
-//
-//      memmove(dst, bp->data + off%BSIZE, m);
-//      brelse(bp);
-//  }
+
 
   readi(ip, dst, 0, BLOCK_STRIPING_START_ADDR);
   iunlock(f->ip);
@@ -769,7 +747,7 @@ int sys_build_block_striping (void){
   strncpy(header, &dst[0], 8);
   strncpy(&header[8], &dst[8], 8);
 
-  //kfree(dst);
+
 
   dev1 = atoi(header);
   dev2 = atoi(&header[8]);
@@ -790,7 +768,6 @@ int sys_build_block_striping (void){
   f1->readable = 1;
   f1->writable = 1;
 
-  //cprintf("sys_build_block_striping ip1->inum %d \n", ip1->inum);
 
   // read from odd-numbered block pieces from dev 2
   struct inode *ip2;
@@ -807,17 +784,6 @@ int sys_build_block_striping (void){
   f2->readable = 1;
   f2->writable = 1;
 
-  //cprintf("sys_build_block_striping ip2->inum %d \n", ip2->inum);
-
-//  char dst1[dev1size];
-//  ilock(ip1);
-//  readi(ip1, dst1, 0, dev1size);
-//  iunlock(ip1);
-//
-//  cprintf("sys_build_block_striping 0=%s 512=%s \n", &dst1[0], &dst1[BSIZE]);
-
-//  char dst2[dev2size];		// due to limitations of num of blocks per process, cannot use dst2
-//  cprintf("sys_build_block_striping 0=%s 512=%s \n", &dst1[0], &dst1[BSIZE]);
 
   int tot;
   char dst1[BSIZE];
@@ -829,7 +795,7 @@ int sys_build_block_striping (void){
 		dst2[j] = 0;
 	}
   int error = -1;
-  //char* result_tmp = kalloc();
+
 
   for(tot=0; tot<dev1size; tot+=BSIZE){
 	  ilock(ip1);

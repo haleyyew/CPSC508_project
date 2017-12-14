@@ -722,10 +722,6 @@ namex_backup(char *path, int nameiparent, char *name, uint dev)
 {
   struct inode *ip, *next;
 
-  //cprintf("namex_backup: ");
-  //cprintf(path);
-  //cprintf(" dev=%d ", dev);
-  //cprintf("\n");
 
   if(*path == '/'){
 	ip = iget(dev, ROOTINO);

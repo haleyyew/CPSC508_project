@@ -28,29 +28,9 @@ void convertBaseVersion(char input, int base, char *output, int digits)
 //#define LENGTH 16
 
 void parity(char* data1, char* data2, char* xor_result){
-	//cprintf("===PARITY=== \n");
+
 	char buf[10];
-	//strncpy(buf, data1, 10);
-	//cprintf("%s", buf);
-//	cprintf("%s \n", data1);
-//	cprintf("%s \n", data2);
 
-	//https://stackoverflow.com/questions/27914271/how-can-i-bitwise-xor-two-c-char-arrays
-//    char const plainone[LENGTH] = "PO";
-//    char const plaintwo[LENGTH] = "PT";
-//    char xor[LENGTH];
-//    int i;
-//
-//    for(i=0; i<LENGTH; ++i)
-//        xor[i] = (char)(plainone[i] ^ plaintwo[i]);
-//    //cprintf("PlainText One: %s\nPlainText Two: %s\n\none^two: ", plainone, plaintwo);
-//    for(i=0; i<LENGTH; ++i){
-//    	convertBaseVersion(xor[i], 2, xor_result, 8);
-//        cprintf("%s ", xor_result);
-//    }
-//    cprintf("\n");
-
-	//sizeof(data)/BSIZE
 
     int i;
 
@@ -62,7 +42,7 @@ void parity(char* data1, char* data2, char* xor_result){
             //cprintf("i=%d binary=%s data1=%s data2=%s result=%s \n", i, buf, &data1[i], &data2[i], xor_result[i]);
     	}
     }
-    //cprintf("\n");
+
 }
 
 void xor(char* cs, char* g, int N){

@@ -158,7 +158,7 @@ filewrite(struct file *f, char *addr, int n)
 int
 filewrite_backup(struct file *f, char *addr, int n)
 {
-	//cprintf("filewrite_backup: f->ip->dev=%d \n", f->ip->dev);
+
   int r;
 
   if(f->writable == 0)
